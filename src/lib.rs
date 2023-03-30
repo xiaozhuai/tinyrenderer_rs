@@ -17,6 +17,7 @@ pub use image_rw::ImageReadError;
 pub use image_rw::ImageWriteError;
 pub use model::Model;
 pub use primitive::draw_line;
+pub use primitive::draw_triangle;
 
 pub type Vec2i = nalgebra::Vector2<i32>;
 pub type Vec3i = nalgebra::Vector3<i32>;

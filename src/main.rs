@@ -1,29 +1,18 @@
 use minifb::{Key, Window, WindowOptions};
 use std::slice;
-use tinyrenderer_rs::{draw_line, Color, Fps, FpsRet, Framebuffer, Model};
+#[allow(unused_imports)]
+use tinyrenderer_rs::{draw_line, draw_triangle};
+use tinyrenderer_rs::{Color, Fps, FpsRet, Framebuffer, Model, Vec3};
 
+#[allow(unused_variables)]
 fn draw(framebuffer: &mut Framebuffer, model: &Model) {
-    let verts = &model.verts;
-    for i in 0..(verts.len() / 3) {
-        draw_line(
-            framebuffer,
-            &verts[i * 3],
-            &verts[i * 3 + 1],
-            &Color::white(),
-        );
-        draw_line(
-            framebuffer,
-            &verts[i * 3 + 1],
-            &verts[i * 3 + 2],
-            &Color::white(),
-        );
-        draw_line(
-            framebuffer,
-            &verts[i * 3 + 2],
-            &verts[i * 3],
-            &Color::white(),
-        );
-    }
+    draw_triangle(
+        framebuffer,
+        &Vec3::new(0f32, 0.9f32, 0f32),
+        &Vec3::new(-0.9f32, -0.9f32, 0f32),
+        &Vec3::new(0.9f32, -0.9f32, 0f32),
+        &Color::blue(),
+    );
     // framebuffer.write("output.png").unwrap();
 }
 

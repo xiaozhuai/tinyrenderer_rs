@@ -1,4 +1,7 @@
-use crate::{Color, Colorf, Framebuffer, Mat2x3, Mat3, Texture2D, Vec2, Vec2i, Vec3, Vec3i};
+use crate::{
+    Color, Colorf, Framebuffer, Mat2x3, Mat3, Texture2D, Texture2DFilterMode, Texture2DWrapMode,
+    Vec2, Vec2i, Vec3, Vec3i,
+};
 use std::cmp::{max, min};
 use std::ops::Neg;
 
@@ -142,7 +145,12 @@ pub fn draw_triangle(
             let depth = p0.z * bc_screen[0] + p1.z * bc_screen[1] + p2.z * bc_screen[2];
             let intensity = intensity * light_intensity;
             let intensity = Colorf::new(intensity, intensity, intensity, 1f32);
-            let mut color = texture.texture(uv.x, uv.y);
+            let mut color = texture.texture(
+                uv.x,
+                uv.y,
+                Texture2DWrapMode::ClampToEdge,
+                Texture2DFilterMode::Linear,
+            );
             color.component_mul_assign(&intensity);
             let color: Color = color.into();
             framebuffer.set_color_with_depth(x, y, depth, &color);

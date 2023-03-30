@@ -20,6 +20,8 @@ pub use model::Model;
 pub use primitive::draw_line;
 pub use primitive::draw_triangle;
 pub use texture::Texture2D;
+pub use texture::Texture2DFilterMode;
+pub use texture::Texture2DWrapMode;
 
 pub type Vec2i = nalgebra::Vector2<i32>;
 pub type Vec3i = nalgebra::Vector3<i32>;

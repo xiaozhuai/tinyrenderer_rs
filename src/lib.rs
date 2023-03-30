@@ -2,6 +2,7 @@ mod color;
 mod fps;
 mod framebuffer;
 mod image_rw;
+mod primitive;
 
 pub use color::Color;
 pub use color::Colorf;
@@ -13,6 +14,7 @@ pub use image_rw::image_read;
 pub use image_rw::image_write;
 pub use image_rw::ImageReadError;
 pub use image_rw::ImageWriteError;
+pub use primitive::draw_line;
 
 pub type Vec2i = nalgebra::Vector2<i32>;
 pub type Vec3i = nalgebra::Vector3<i32>;

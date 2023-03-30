@@ -1,13 +1,20 @@
 use minifb::{Key, Window, WindowOptions};
 use std::slice;
-use tinyrenderer_rs::{Color, Fps, FpsRet, Framebuffer};
+use tinyrenderer_rs::{draw_line, Color, Fps, FpsRet, Framebuffer, Vec2i};
 
 fn draw(framebuffer: &mut Framebuffer) {
-    for y in 0..framebuffer.height {
-        for x in 0..framebuffer.width {
-            framebuffer.set_color(x, y, &Color::red());
-        }
-    }
+    draw_line(
+        framebuffer,
+        &Vec2i::new(0, 0),
+        &Vec2i::new(600, 200),
+        &Color::red(),
+    );
+    draw_line(
+        framebuffer,
+        &Vec2i::new(0, 0),
+        &Vec2i::new(200, 600),
+        &Color::green(),
+    );
     // framebuffer.write("output.png").unwrap();
 }
 

@@ -1,5 +1,6 @@
-use crate::{Color, Framebuffer, Vec2i, Vec3, Vec3i};
+use crate::{Color, Colorf, Framebuffer, Mat2x3, Mat3, Texture2D, Vec2, Vec2i, Vec3, Vec3i};
 use std::cmp::{max, min};
+use std::ops::Neg;
 
 fn to_screen_pos(pos: &Vec3, screen_size: &Vec2i) -> Vec2i {
     Vec2i::new(
@@ -80,12 +81,21 @@ fn barycentric(p: &Vec2i, p0: &Vec2i, p1: &Vec2i, p2: &Vec2i) -> Vec3 {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn draw_triangle(
     framebuffer: &mut Framebuffer,
+    texture: &Texture2D,
     p0: &Vec3,
     p1: &Vec3,
     p2: &Vec3,
-    color: &Color,
+    uv0: &Vec2,
+    uv1: &Vec2,
+    uv2: &Vec2,
+    norm0: &Vec3,
+    norm1: &Vec3,
+    norm2: &Vec3,
+    light_dir: &Vec3,
+    light_intensity: f32,
 ) {
     let fb_size = Vec2i::new(framebuffer.width, framebuffer.height);
     let p0_s = &to_screen_pos(p0, &fb_size);
@@ -114,8 +124,28 @@ pub fn draw_triangle(
             if bc_screen.x < 0f32 || bc_screen.y < 0f32 || bc_screen.z < 0f32 {
                 continue;
             }
+
+            let bc_clip: Vec3 = bc_screen;
+            let bc_clip: Vec3 = bc_clip / (bc_clip.x + bc_clip.y + bc_clip.z);
+
+            let p_uv: Mat2x3 = Mat2x3::new(uv0.x, uv1.x, uv2.x, uv0.y, uv1.y, uv2.y);
+            let uv: Vec2 = p_uv * bc_clip;
+
+            let p_norm: Mat3 = Mat3::new(
+                norm0.x, norm1.x, norm2.x, norm0.y, norm1.y, norm2.y, norm0.z, norm1.z, norm2.z,
+            );
+            let norm: Vec3 = p_norm * bc_clip;
+
+            let n = norm.normalize().neg();
+            let intensity = n.dot(light_dir);
+
             let depth = p0.z * bc_screen[0] + p1.z * bc_screen[1] + p2.z * bc_screen[2];
-            framebuffer.set_color_with_depth(x, y, depth, color);
+            let intensity = intensity * light_intensity;
+            let intensity = Colorf::new(intensity, intensity, intensity, 1f32);
+            let mut color = texture.texture(uv.x, uv.y);
+            color.component_mul_assign(&intensity);
+            let color: Color = color.into();
+            framebuffer.set_color_with_depth(x, y, depth, &color);
         }
     }
 }

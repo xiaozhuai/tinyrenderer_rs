@@ -2,23 +2,30 @@ use minifb::{Key, Window, WindowOptions};
 use std::slice;
 #[allow(unused_imports)]
 use tinyrenderer_rs::{draw_line, draw_triangle};
-use tinyrenderer_rs::{Color, Colorf, Fps, FpsRet, Framebuffer, Model, Vec3};
+use tinyrenderer_rs::{Color, Fps, FpsRet, Framebuffer, Model, Texture2D, Vec3};
 
 #[allow(unused_variables)]
-fn draw(framebuffer: &mut Framebuffer, model: &Model) {
+fn draw(framebuffer: &mut Framebuffer, model: &Model, texture: &Texture2D) {
     let verts = &model.verts;
+    let uvs = &model.uvs;
+    let norms = &model.norms;
     let light_dir = Vec3::new(0f32, 0f32, -1f32);
+    let light_intensity = 1f32;
     for i in 0..(verts.len() / 3) {
-        let n: Vec3 = (verts[i * 3 + 2] - verts[i * 3]).cross(&(verts[i * 3 + 1] - verts[i * 3]));
-        let n = n.normalize();
-        let intensity = n.dot(&light_dir);
-        let color = Colorf::new(intensity, intensity, intensity, 1f32);
         draw_triangle(
             framebuffer,
+            texture,
             &verts[i * 3],
             &verts[i * 3 + 1],
             &verts[i * 3 + 2],
-            &color.into(),
+            &uvs[i * 3],
+            &uvs[i * 3 + 1],
+            &uvs[i * 3 + 2],
+            &norms[i * 3],
+            &norms[i * 3 + 1],
+            &norms[i * 3 + 2],
+            &light_dir,
+            light_intensity,
         );
     }
     // framebuffer.write("output.png").unwrap();
@@ -41,6 +48,7 @@ const HEIGHT: i32 = 1024;
 
 fn main() {
     let model = Model::load("assets/african_head/african_head.obj").unwrap();
+    let diffuse_texture = Texture2D::load("assets/african_head/african_head_diffuse.png").unwrap();
     let mut window = Window::new(
         "Tiny Renderer - ESC to exit",
         WIDTH as usize,
@@ -54,7 +62,7 @@ fn main() {
     while window.is_open() && !window.is_key_down(Key::Escape) {
         framebuffer.clear_color_with(&Color::black());
         framebuffer.clear_depth();
-        draw(&mut framebuffer, &model);
+        draw(&mut framebuffer, &model, &diffuse_texture);
         let rgba_buffer = framebuffer.to_u32_slice();
         rgba_to_bgra(&mut bgra_buffer, rgba_buffer);
         window

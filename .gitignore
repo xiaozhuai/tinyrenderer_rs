@@ -1,0 +1,5 @@
+/target
+/.idea
+/output.png
+/output_depth.png
+.DS_Store

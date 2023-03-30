@@ -13,17 +13,16 @@ fn draw(framebuffer: &mut Framebuffer, model: &Model) {
         let n = n.normalize();
         let intensity = n.dot(&light_dir);
         let color = Colorf::new(intensity, intensity, intensity, 1f32);
-        if intensity > 0f32 {
-            draw_triangle(
-                framebuffer,
-                &verts[i * 3],
-                &verts[i * 3 + 1],
-                &verts[i * 3 + 2],
-                &color.into(),
-            );
-        }
+        draw_triangle(
+            framebuffer,
+            &verts[i * 3],
+            &verts[i * 3 + 1],
+            &verts[i * 3 + 2],
+            &color.into(),
+        );
     }
     // framebuffer.write("output.png").unwrap();
+    // framebuffer.write_depth("output_depth.png").unwrap();
 }
 
 fn rgba_to_bgra(dst: &mut [u32], src: &[u32]) {
@@ -54,6 +53,7 @@ fn main() {
     let mut bgra_buffer: Vec<u32> = vec![0; (WIDTH * HEIGHT) as usize];
     while window.is_open() && !window.is_key_down(Key::Escape) {
         framebuffer.clear_color_with(&Color::black());
+        framebuffer.clear_depth();
         draw(&mut framebuffer, &model);
         let rgba_buffer = framebuffer.to_u32_slice();
         rgba_to_bgra(&mut bgra_buffer, rgba_buffer);

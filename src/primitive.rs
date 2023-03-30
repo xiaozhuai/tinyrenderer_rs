@@ -12,6 +12,7 @@ pub fn draw_line(framebuffer: &mut Framebuffer, p0: &Vec3, p1: &Vec3, color: &Co
     let fb_size = Vec2i::new(framebuffer.width, framebuffer.height);
     let mut p0_s = to_screen_pos(p0, &fb_size);
     let mut p1_s = to_screen_pos(p1, &fb_size);
+    let direction = p1 - p0;
     let mut steep = false;
     if (p0_s.x - p1_s.x).abs() < (p0_s.y - p1_s.y).abs() {
         p0_s.swap_rows(0, 1);
@@ -25,11 +26,20 @@ pub fn draw_line(framebuffer: &mut Framebuffer, p0: &Vec3, p1: &Vec3, color: &Co
     let dy = p1_s.y - p0_s.y;
     let derror2 = dy.abs() * 2;
     let y_step = if p1_s.y > p0_s.y { 1 } else { -1 };
+    let fb_width_2 = fb_size.x as f32 * 0.5f32;
+    let fb_height_2 = fb_size.y as f32 * 0.5f32;
     let mut error2 = 0;
     let mut y = p0_s.y;
     if steep {
         for x in p0_s.x..=p1_s.x {
-            framebuffer.set_color(y, x, color);
+            let depth: f32;
+            if direction.y != 0f32 {
+                let t = ((x as f32 / fb_height_2 - 1f32) - p0.y) / direction.y;
+                depth = p0.z + t * direction.z;
+            } else {
+                depth = direction.z;
+            }
+            framebuffer.set_color_with_depth(y, x, depth, color);
             error2 += derror2;
             if error2 > dx {
                 y += y_step;
@@ -38,7 +48,14 @@ pub fn draw_line(framebuffer: &mut Framebuffer, p0: &Vec3, p1: &Vec3, color: &Co
         }
     } else {
         for x in p0_s.x..=p1_s.x {
-            framebuffer.set_color(x, y, color);
+            let depth: f32;
+            if direction.x != 0f32 {
+                let t = ((x as f32 / fb_width_2 - 1f32) - p0.x) / direction.x;
+                depth = p0.z + t * direction.z;
+            } else {
+                depth = direction.z;
+            }
+            framebuffer.set_color_with_depth(x, y, depth, color);
             error2 += derror2;
             if error2 > dx {
                 y += y_step;
@@ -97,7 +114,8 @@ pub fn draw_triangle(
             if bc_screen.x < 0f32 || bc_screen.y < 0f32 || bc_screen.z < 0f32 {
                 continue;
             }
-            framebuffer.set_color(x, y, color);
+            let depth = p0.z * bc_screen[0] + p1.z * bc_screen[1] + p2.z * bc_screen[2];
+            framebuffer.set_color_with_depth(x, y, depth, color);
         }
     }
 }

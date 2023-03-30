@@ -1,8 +1,16 @@
-use crate::{Color, Framebuffer, Vec2i};
+use crate::{Color, Framebuffer, Vec2i, Vec3};
 
-pub fn draw_line(framebuffer: &mut Framebuffer, p0: &Vec2i, p1: &Vec2i, color: &Color) {
-    let mut p0_s = *p0;
-    let mut p1_s = *p1;
+fn to_screen_pos(pos: &Vec3, screen_size: &Vec2i) -> Vec2i {
+    Vec2i::new(
+        (((pos.x + 1f32) / 2f32) * screen_size.x as f32).round() as i32,
+        (((-pos.y + 1f32) / 2f32) * screen_size.y as f32).round() as i32,
+    )
+}
+
+pub fn draw_line(framebuffer: &mut Framebuffer, p0: &Vec3, p1: &Vec3, color: &Color) {
+    let fb_size = Vec2i::new(framebuffer.width, framebuffer.height);
+    let mut p0_s = to_screen_pos(p0, &fb_size);
+    let mut p1_s = to_screen_pos(p1, &fb_size);
     let mut steep = false;
     if (p0_s.x - p1_s.x).abs() < (p0_s.y - p1_s.y).abs() {
         p0_s.swap_rows(0, 1);

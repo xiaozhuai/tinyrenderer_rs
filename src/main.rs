@@ -1,20 +1,29 @@
 use minifb::{Key, Window, WindowOptions};
 use std::slice;
-use tinyrenderer_rs::{draw_line, Color, Fps, FpsRet, Framebuffer, Vec2i};
+use tinyrenderer_rs::{draw_line, Color, Fps, FpsRet, Framebuffer, Model};
 
-fn draw(framebuffer: &mut Framebuffer) {
-    draw_line(
-        framebuffer,
-        &Vec2i::new(0, 0),
-        &Vec2i::new(600, 200),
-        &Color::red(),
-    );
-    draw_line(
-        framebuffer,
-        &Vec2i::new(0, 0),
-        &Vec2i::new(200, 600),
-        &Color::green(),
-    );
+fn draw(framebuffer: &mut Framebuffer, model: &Model) {
+    let verts = &model.verts;
+    for i in 0..(verts.len() / 3) {
+        draw_line(
+            framebuffer,
+            &verts[i * 3],
+            &verts[i * 3 + 1],
+            &Color::white(),
+        );
+        draw_line(
+            framebuffer,
+            &verts[i * 3 + 1],
+            &verts[i * 3 + 2],
+            &Color::white(),
+        );
+        draw_line(
+            framebuffer,
+            &verts[i * 3 + 2],
+            &verts[i * 3],
+            &Color::white(),
+        );
+    }
     // framebuffer.write("output.png").unwrap();
 }
 
@@ -33,6 +42,7 @@ const WIDTH: i32 = 1024;
 const HEIGHT: i32 = 1024;
 
 fn main() {
+    let model = Model::load("assets/african_head/african_head.obj").unwrap();
     let mut window = Window::new(
         "Tiny Renderer - ESC to exit",
         WIDTH as usize,
@@ -45,7 +55,7 @@ fn main() {
     let mut bgra_buffer: Vec<u32> = vec![0; (WIDTH * HEIGHT) as usize];
     while window.is_open() && !window.is_key_down(Key::Escape) {
         framebuffer.clear_color_with(&Color::black());
-        draw(&mut framebuffer);
+        draw(&mut framebuffer, &model);
         let rgba_buffer = framebuffer.to_u32_slice();
         rgba_to_bgra(&mut bgra_buffer, rgba_buffer);
         window
